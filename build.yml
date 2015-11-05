@@ -11,7 +11,7 @@
 
   tasks:
     - name: make sure packages are installed
-      action: apt pkg={{item}} state=installed
+      action: apt pkg={{item}} state=installed update_cache=yes
       with_items:
         - htop
         - atool
@@ -32,6 +32,8 @@
         - libxml2-dev
         - libxslt1-dev
         - lib32z1-dev
+        - default-jdk
+        - tomcat6
 
 #CKAN setup
     - name: remove old code
@@ -50,7 +52,6 @@
 
     - name: run setup.py develop for ckan
       action: command chdir=/usr/lib/ckan/src/ckan/ ../../bin/python setup.py develop
-
 
     - name: get harvest extension
       action: git repo=https://github.com/GSA/ckanext-harvest dest=/usr/lib/ckan/src/ckanext-harvest version=2.3-upgrade
@@ -79,6 +80,25 @@
     - name: run setup.py develop for datajson
       action: command chdir=/usr/lib/ckan/src/ckanext-datajson/ ../../bin/python setup.py develop
 
+    - name: get geodatagov
+      action: git repo=https://github.com/GSA/ckanext-geodatagov.git dest=/usr/lib/ckan/src/ckanext-geodatagov version=2.3-upgrade
+
+    - name: install requirements for geodatagov
+      action: pip requirements=/usr/lib/ckan/src/ckanext-geodatagov/pip-requirements.txt virtualenv=/usr/lib/ckan/
+
+    - name: run setup.py develop for geodatagov
+      action: command chdir=/usr/lib/ckan/src/ckanext-geodatagov/ ../../bin/python setup.py develop
+
+    - name: get datagovtheme
+      action: git repo=https://github.com/GSA/ckanext-datagovtheme.git dest=/usr/lib/ckan/src/ckanext-datagovtheme version=2.3-upgrade
+
+    - name: run setup.py develop for datagovtheme
+      action: command chdir=/usr/lib/ckan/src/ckanext-datagovtheme/ ../../bin/python setup.py develop
+
+    - name: make dynamic_menu
+      shell: "mkdir -p /usr/lib/ckan/src/ckanext-datagovtheme/ckanext/datagovtheme/dynamic_menu"
+    - name: fix permissions problem
+      shell: "chmod  -R a+rw /usr/lib/ckan/src/ckanext-datagovtheme/ckanext/datagovtheme/dynamic_menu"
 
     - name: remove psycopg2
       action: pip name=psycopg2 virtualenv=/usr/lib/ckan/ state=absent
@@ -107,6 +127,7 @@
         - etc/cron.d/supervisor
         - etc/supervisord.conf
         - etc/init/supervisor.conf
+        - var/lib/tomcat6/webapps/fgdc2iso.war
 
     - name: copy executables
       action: copy src={{item}} dest=/{{item}} mode=744
