@@ -229,9 +229,52 @@
       sudo_user: postgres
 
     - name: install postgis script
-      shell: psql -d ckan -c "GRANT SELECT, UPDATE, INSERT, DELETE ON spatial_ref_sys TO ckan;"
+      shell: psql -d ckan -c "GRANT ALL PRIVILEGES ON spatial_ref_sys TO ckan;"
       sudo: yes
       sudo_user: postgres
 
     - name: Initialize ckan db
       action: command ckan db init
+
+##################################
+# pycsw setup
+##################################
+    - name: create pycsw database
+      shell: psql -c "CREATE DATABASE pycsw OWNER ckan;"
+      sudo: yes
+      sudo_user: postgres
+
+    - name: add postgis to pycsw database
+      shell: psql -d pycsw -c "CREATE EXTENSION postgis;"
+      sudo: yes
+      sudo_user: postgres
+
+    - name: get pycsw version
+      action: git repo=https://github.com/geopython/pycsw.git dest=/usr/lib/ckan/src/pycsw version=1.10.3
+
+    - name: run setup build for pycsw
+      action: command chdir=/usr/lib/ckan/src/pycsw/ ../../bin/python setup.py build
+
+    - name: run setup install for pycsw
+      action: command chdir=/usr/lib/ckan/src/pycsw/ ../../bin/python setup.py install
+
+    - name: install pyproj
+      action: pip name=pyproj version=1.9.3 virtualenv=/usr/lib/ckan/
+
+    - name: install geolinks
+      action: pip name=geolinks version=0.0.1 virtualenv=/usr/lib/ckan/
+
+    - name: copy pycsw configuration files
+      action: copy src={{item}} dest=/{{item}} mode=644
+      with_items:
+        - etc/ckan/pycsw-all.cfg
+        - etc/ckan/pycsw-collection.cfg
+        - etc/ckan/pycsw.wsgi
+        - etc/cron.d/ckan-pycsw
+        - usr/lib/ckan/bin/pycsw-db-admin.py
+
+    - name: Initialize pycsw db
+      action: command chdir=/usr/lib/ckan/src/ckanext-spatial/ ../../bin/paster ckan-pycsw setup -p /etc/ckan/pycsw-all.cfg
+
+
+
