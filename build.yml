@@ -95,10 +95,11 @@
     - name: run setup.py develop for datagovtheme
       action: command chdir=/usr/lib/ckan/src/ckanext-datagovtheme/ ../../bin/python setup.py develop
 
-    - name: make dynamic_menu
-      shell: "mkdir -p /usr/lib/ckan/src/ckanext-datagovtheme/ckanext/datagovtheme/dynamic_menu"
-    - name: fix permissions problem
-      shell: "chmod  -R a+rw /usr/lib/ckan/src/ckanext-datagovtheme/ckanext/datagovtheme/dynamic_menu"
+    - name: Create symlinks
+      file: src=/var/tmp/ckan/{{item}}  dest=/usr/lib/ckan/src/ckan/ckan/public/{{item}} state=link force=yes
+      with_items:
+        - usasearch-custom-feed.xml
+        - csv
 
     - name: remove psycopg2
       action: pip name=psycopg2 virtualenv=/usr/lib/ckan/ state=absent
