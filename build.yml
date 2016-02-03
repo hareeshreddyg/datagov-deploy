@@ -124,9 +124,6 @@
         - etc/apache2/sites-enabled/ckan.conf
         - etc/cron.daily/remove_old_sessions
         - etc/supervisord.conf
-        - etc/cron.d/ckan-harvest
-        - etc/cron.d/supervisor
-        - etc/supervisord.conf
         - etc/init/supervisor.conf
         - var/lib/tomcat6/webapps/fgdc2iso.war
 
@@ -141,12 +138,6 @@
 
     - name: restart apache
       action: service name=apache2 state=restarted
-
-    - name: create superviserctl symlink
-      action: file src=/usr/lib/ckan/bin/supervisorctl dest=/usr/bin/supervisorctl state=link
-
-    - name: start supervisor
-      action: command initctl start supervisor
 
 ##################################
 # SOLR setup
@@ -249,6 +240,21 @@
       action: command ckan db init
 
 ##################################
+# Start cron and backend services
+##################################
+
+    - name: copy all needed files
+      action: copy src={{item}} dest=/{{item}}
+      with_items:
+        - etc/cron.d/ckan
+        - etc/cron.d/supervisor
+
+    - name: create superviserctl symlink
+      action: file src=/usr/lib/ckan/bin/supervisorctl dest=/usr/bin/supervisorctl state=link
+
+    - name: start supervisor
+      action: command initctl start supervisor
+##################################
 # pycsw setup
 ##################################
     - name: create pycsw database
@@ -282,7 +288,7 @@
         - etc/ckan/pycsw-all.cfg
         - etc/ckan/pycsw-collection.cfg
         - etc/ckan/pycsw.wsgi
-        - etc/cron.d/ckan-pycsw
+        - etc/cron.d/pycsw
         - usr/lib/ckan/bin/pycsw-db-admin.py
 
     - name: Initialize pycsw db
