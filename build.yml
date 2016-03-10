@@ -95,6 +95,30 @@
     - name: run setup.py develop for datagovtheme
       action: command chdir=/usr/lib/ckan/src/ckanext-datagovtheme/ ../../bin/python setup.py develop
 
+    - name: get archiver extension
+      action: git repo=https://github.com/GSA/ckanext-archiver dest=/usr/lib/ckan/src/ckanext-archiver version=2.3-upgrade
+
+    - name: install requirements for archiver
+      action: pip requirements=/usr/lib/ckan/src/ckanext-archiver/pip-requirements.txt virtualenv=/usr/lib/ckan/
+
+    - name: run setup.py develop for archiver
+      action: command chdir=/usr/lib/ckan/src/ckanext-archiver/ ../../bin/python setup.py develop
+
+    - name: get qa extension
+      action: git repo=https://github.com/GSA/ckanext-qa dest=/usr/lib/ckan/src/ckanext-qa version=2.3-upgrade
+
+    - name: install requirements for qa
+      action: pip requirements=/usr/lib/ckan/src/ckanext-qa/pip-requirements.txt virtualenv=/usr/lib/ckan/
+
+    - name: run setup.py develop for qa
+      action: command chdir=/usr/lib/ckan/src/ckanext-qa/ ../../bin/python setup.py develop
+
+    - name: get report extension
+      action: git repo=https://github.com/GSA/ckanext-report dest=/usr/lib/ckan/src/ckanext-report version=2.3-upgrade
+
+    - name: run setup.py develop for report
+      action: command chdir=/usr/lib/ckan/src/ckanext-report/ ../../bin/python setup.py develop
+
     - name: Create symlinks
       file: src=/var/tmp/ckan/{{item}}  dest=/usr/lib/ckan/src/ckan/ckan/public/{{item}} state=link force=yes
       with_items:
@@ -238,6 +262,9 @@
 
     - name: Initialize ckan db
       action: command ckan db init
+
+    - name: Initialize ckan report db
+      action: command ckan --plugin=ckanext-report report initdb
 
 ##################################
 # Start cron and backend services
