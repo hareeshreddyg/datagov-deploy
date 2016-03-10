@@ -151,6 +151,9 @@
         - etc/init/supervisor.conf
         - var/lib/tomcat6/webapps/fgdc2iso.war
 
+    - name: point site_url in production.ini to localhost
+      action: lineinfile dest=/etc/hosts line="127.0.0.1 catalog.data.gov"
+
     - name: copy executables
       action: copy src={{item}} dest=/{{item}} mode=744
       with_items:
