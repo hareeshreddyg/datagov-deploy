@@ -1,0 +1,90 @@
+version: '2'
+
+volumes:
+  worklog:
+
+services:
+  solr:
+    build: ./solr
+    volumes:
+      - /opt/solr/example/solr
+
+  postgres:
+    build: ./postgres
+    volumes:
+      - /etc/postgresql
+      - /var/log/postgresql
+      - /var/lib/postgresql
+
+  redis:
+    image: redis
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - fe
+      - pycsw
+
+  fgdc2iso:
+    build: ./fgdc2iso
+    volumes:
+      - /etc/saxon-license
+
+  fe:
+    build: ./ckan
+    command: /usr/sbin/apache2ctl -D FOREGROUND
+    extra_hosts:
+      - "catalog.data.gov:127.0.0.1"
+    volumes:
+      - ./configs/ckan:/etc/ckan
+      - ./configs/pycsw:/etc/pycsw
+    links:
+      - postgres
+      - solr
+
+  worker:
+    build: ./ckan
+    links:
+      - postgres
+      - solr
+      - redis
+      - fe:catalog.data.gov
+    volumes:
+      - worklog:/var/log
+      - ./configs/ckan:/etc/ckan
+      - ./configs/pycsw:/etc/pycsw
+
+  pycsw:
+    build: ./pycsw
+    command: /usr/sbin/apache2ctl -D FOREGROUND
+    links:
+      - postgres
+      - fe:catalog.data.gov
+    volumes:
+      - ./configs/pycsw:/etc/pycsw
+
+  gather:
+    build: ./ckan
+    command: ckan --plugin=ckanext-harvest harvester gather_consumer
+    links:
+      - postgres
+      - solr
+      - redis
+      - fe:catalog.data.gov
+    volumes:
+      - ./configs/ckan:/etc/ckan
+
+  fetch:
+    build: ./ckan
+    command: ckan --plugin=ckanext-harvest harvester fetch_consumer
+    links:
+      - postgres
+      - solr
+      - redis
+      - fe:catalog.data.gov
+      - fgdc2iso
+    volumes:
+      - ./configs/ckan:/etc/ckan
