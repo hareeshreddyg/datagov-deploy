@@ -79,6 +79,10 @@ docker-compose run worker ckan --plugin=ckanext-geodatagov geodatagov db_solr_sy
 
 docker-compose run worker ckan --plugin=ckanext-geodatagov geodatagov harvest-job-cleanup
 
+docker-compose run worker ckan --plugin=ckanext-geodatagov geodatagov combine-feeds
+
+docker-compose run worker ckan --plugin=ckanext-geodatagov geodatagov export-csv
+
 docker-compose run worker /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw set_keywords -p /etc/pycsw/pycsw-collection.cfg
 
 docker-compose run worker /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw set_keywords -p /etc/pycsw/pycsw-all.cfg

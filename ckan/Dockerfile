@@ -80,6 +80,7 @@ RUN cd pycsw && \
     ../../bin/pip install pyproj==1.9.3 && \
     ../../bin/pip install geolinks==0.0.1
 
+RUN mkdir /var/tmp/ckan && chown www-data:www-data /var/tmp/ckan
 RUN ln -s /var/tmp/ckan/usasearch-custom-feed.xml $CKAN_HOME/src/ckan/ckan/public/usasearch-custom-feed.xml
 RUN ln -s /var/tmp/ckan/csv $CKAN_HOME/src/ckan/ckan/public/csv
 
