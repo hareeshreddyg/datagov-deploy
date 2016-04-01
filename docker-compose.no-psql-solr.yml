@@ -2,6 +2,7 @@ version: '2'
 
 volumes:
   worklog:
+  worktmp:
 
 services:
   redis:
@@ -29,6 +30,7 @@ services:
     volumes:
       - ./configs/ckan:/etc/ckan
       - ./configs/pycsw:/etc/pycsw
+      - worktmp:/var/tmp/ckan
 
   worker:
     build: ./ckan
@@ -37,6 +39,7 @@ services:
       - fe:catalog.data.gov
     volumes:
       - worklog:/var/log
+      - worktmp:/var/tmp/ckan
       - ./configs/ckan:/etc/ckan
       - ./configs/pycsw:/etc/pycsw
 
