@@ -27,7 +27,7 @@ Yeah you will get an error for missing docker-compose.yml file. Things are not t
 
       * `docker-compose up -d fe`
 
-      * `docker-compose run fe ckan db init`
+      * `docker-compose run --rm fe ckan db init`
 
       * `docker-compose up -d gather && sleep 2 && docker-compose up -d`
 
@@ -42,10 +42,10 @@ Other optional initialization steps
 If you are not sure what these are about, just run it. It does not hurt to run multiple times.
 
 ```
-docker-compose run fe ckan --plugin=ckanext-report report initdb
+docker-compose run --rm fe ckan --plugin=ckanext-report report initdb
   - to set up db table for ckanext-report extension.
 
-docker-compose run fe /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw setup -p /etc/pycsw/pycsw-all.cfg
+docker-compose run --rm fe /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw setup -p /etc/pycsw/pycsw-all.cfg
   - to set up pycsw tables, if needed.
 
 docker cp saxon-license.lic ckan_fgdc2iso_1:/etc/saxon-license/
@@ -60,7 +60,7 @@ Harvesting
 
 Here is how to harvest. Run it every a few minutes:
 ```
-docker-compose run worker sh -c "touch /var/log/harvester_run.log && ckan --plugin=ckanext-harvest harvester run"
+docker-compose run --rm worker sh -c "touch /var/log/harvester_run.log && ckan --plugin=ckanext-harvest harvester run"
 ```
 
 This will help speed up harvesting, give it a reasonable number:
@@ -71,31 +71,31 @@ docker-compose scale fetch=4
 Other routing commands
 ======================
 ```
-docker-compose run worker ckan --plugin=ckanext-geodatagov geodatagov clean-deleted
+docker-compose run --rm worker ckan --plugin=ckanext-geodatagov geodatagov clean-deleted
 
-docker-compose run worker ckan tracking update
+docker-compose run --rm worker ckan tracking update
 
-docker-compose run worker ckan --plugin=ckanext-geodatagov geodatagov db_solr_sync
+docker-compose run --rm worker ckan --plugin=ckanext-geodatagov geodatagov db_solr_sync
 
-docker-compose run worker ckan --plugin=ckanext-geodatagov geodatagov harvest-job-cleanup
+docker-compose run --rm worker ckan --plugin=ckanext-geodatagov geodatagov harvest-job-cleanup
 
-docker-compose run worker ckan --plugin=ckanext-geodatagov geodatagov combine-feeds
+docker-compose run --rm worker ckan --plugin=ckanext-geodatagov geodatagov combine-feeds
 
-docker-compose run worker ckan --plugin=ckanext-geodatagov geodatagov export-csv
+docker-compose run --rm worker ckan --plugin=ckanext-geodatagov geodatagov export-csv
 
-docker-compose run worker /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw set_keywords -p /etc/pycsw/pycsw-collection.cfg
+docker-compose run --rm worker /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw set_keywords -p /etc/pycsw/pycsw-collection.cfg
 
-docker-compose run worker /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw set_keywords -p /etc/pycsw/pycsw-all.cfg
+docker-compose run --rm worker /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw set_keywords -p /etc/pycsw/pycsw-all.cfg
 
-docker-compose run worker /usr/lib/ckan/bin/python /usr/lib/ckan/bin/pycsw-db-admin.py reindex_fts /etc/pycsw/pycsw-all.cfg
+docker-compose run --rm worker /usr/lib/ckan/bin/python /usr/lib/ckan/bin/pycsw-db-admin.py reindex_fts /etc/pycsw/pycsw-all.cfg
 
-docker-compose run worker sh -c "/usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw load -p /etc/pycsw/pycsw-all.cfg && /usr/lib/ckan/bin/python /usr/lib/ckan/bin/pycsw-db-admin.py vacuumdb /etc/pycsw/pycsw-all.cfg"
+docker-compose run --rm worker sh -c "/usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw load -p /etc/pycsw/pycsw-all.cfg && /usr/lib/ckan/bin/python /usr/lib/ckan/bin/pycsw-db-admin.py vacuumdb /etc/pycsw/pycsw-all.cfg"
   - Yeah I agree all these ckan-pycsw commands should be migrated into pycsw container.
 
-docker-compose run worker ckan --plugin=ckanext-qa qa update_sel
+docker-compose run --rm worker ckan --plugin=ckanext-qa qa update_sel
 
-docker-compose run worker ckan --plugin=ckanext-report report generate
+docker-compose run --rm worker ckan --plugin=ckanext-report report generate
 
-docker-compose run worker sh -c "ckan --plugin=ckanext-qa qa collect-ids && ckan --plugin=ckanext-qa qa update"
+docker-compose run --rm worker sh -c "ckan --plugin=ckanext-qa qa collect-ids && ckan --plugin=ckanext-qa qa update"
   - Caution!!! This will take forever to complete on a big database.
 ```
