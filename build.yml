@@ -116,6 +116,12 @@
     - name: run setup.py develop for report
       action: command chdir=/usr/lib/ckan/src/ckanext-report/ ../../bin/python setup.py develop
 
+    - name: get googleanalyticsbasic extension
+      action: git repo=https://github.com/GSA/ckanext-googleanalyticsbasic dest=/usr/lib/ckan/src/ckanext-googleanalyticsbasic
+
+    - name: run setup.py develop for googleanalyticsbasic
+      action: command chdir=/usr/lib/ckan/src/ckanext-googleanalyticsbasic/ ../../bin/python setup.py develop
+
     - name: Create symlinks
       file: src=/var/tmp/ckan/{{item}}  dest=/usr/lib/ckan/src/ckan/ckan/public/{{item}} state=link force=yes
       with_items:
