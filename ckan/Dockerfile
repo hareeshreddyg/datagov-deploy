@@ -73,6 +73,10 @@ RUN git clone -b 2.3-upgrade https://github.com/GSA/ckanext-report
 RUN cd ckanext-report && \
     ../../bin/python setup.py develop
 
+RUN git clone https://github.com/GSA/ckanext-googleanalyticsbasic
+RUN cd ckanext-googleanalyticsbasic && \
+    ../../bin/python setup.py develop
+
 RUN git clone -b 1.10.3 https://github.com/geopython/pycsw
 RUN cd pycsw && \
     ../../bin/python setup.py build && \
