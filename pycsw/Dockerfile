@@ -22,7 +22,7 @@ RUN apt-get update && \
 
 ENV PYCSW_HOME /usr/lib/pycsw
 ENV PYCSW_CONFIG /etc/pycsw
-ENV PYCSW_VERSION 1.10.3
+ENV PYCSW_VERSION ckan
 
 # Create directories & virtual env for PYCSW
 RUN virtualenv $PYCSW_HOME
@@ -30,12 +30,11 @@ RUN mkdir -p $PYCSW_CONFIG $PYCSW_HOME/src
 
 WORKDIR $PYCSW_HOME/src
 
-RUN git clone -b $PYCSW_VERSION https://github.com/geopython/pycsw
+RUN git clone -b $PYCSW_VERSION https://github.com/GSA/pycsw
 RUN cd pycsw && \
     ../../bin/python setup.py build && \
     ../../bin/python setup.py install && \
-    ../../bin/pip install -r requirements.txt && \
-    ../../bin/pip install sqlalchemy
+    ../../bin/pip install -r requirements.txt
 
 RUN rm -f /etc/apache2/sites-enabled/000-default.conf
 

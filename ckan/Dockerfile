@@ -77,13 +77,6 @@ RUN git clone https://github.com/GSA/ckanext-googleanalyticsbasic
 RUN cd ckanext-googleanalyticsbasic && \
     ../../bin/python setup.py develop
 
-RUN git clone -b 1.10.3 https://github.com/geopython/pycsw
-RUN cd pycsw && \
-    ../../bin/python setup.py build && \
-    ../../bin/python setup.py install && \
-    ../../bin/pip install pyproj==1.9.3 && \
-    ../../bin/pip install geolinks==0.0.1
-
 RUN mkdir /var/tmp/ckan && chown www-data:www-data /var/tmp/ckan
 RUN ln -s /var/tmp/ckan/usasearch-custom-feed.xml $CKAN_HOME/src/ckan/ckan/public/usasearch-custom-feed.xml
 RUN ln -s /var/tmp/ckan/csv $CKAN_HOME/src/ckan/ckan/public/csv
@@ -92,7 +85,6 @@ RUN rm -f /etc/apache2/sites-enabled/000-default.conf
 
 ADD etc/apache2/sites-enabled/ckan.conf /etc/apache2/sites-enabled
 ADD usr/bin/ckan /usr/bin
-ADD usr/lib/ckan/bin/pycsw-db-admin.py /usr/lib/ckan/bin
 RUN chmod 744 /usr/bin/ckan
 
 RUN a2enmod rewrite headers
