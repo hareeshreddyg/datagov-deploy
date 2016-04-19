@@ -11,8 +11,8 @@ USER postgres
 RUN /etc/init.d/postgresql start &&\
     psql -c "CREATE USER ckan WITH SUPERUSER PASSWORD 'pass';" &&\
     psql -c "CREATE USER pycsw WITH SUPERUSER PASSWORD 'pass';" &&\
-    createdb -O ckan ckan &&\
-    createdb -O pycsw pycsw &&\
+    createdb -O ckan -T template0 -E utf-8 ckan &&\
+    createdb -O pycsw -T template0 -E utf-8 pycsw &&\
     psql -d ckan -c "CREATE EXTENSION postgis;" &&\
     psql -d ckan -c "GRANT ALL PRIVILEGES ON spatial_ref_sys TO ckan;" && \
     psql -d pycsw -c "CREATE EXTENSION postgis;" &&\
