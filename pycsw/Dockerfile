@@ -25,7 +25,7 @@ ENV PYCSW_CONFIG /etc/pycsw
 ENV PYCSW_VERSION ckan
 
 # Create directories & virtual env for PYCSW
-RUN virtualenv $PYCSW_HOME
+RUN virtualenv $PYCSW_HOME --system-site-packages
 RUN mkdir -p $PYCSW_CONFIG $PYCSW_HOME/src
 
 WORKDIR $PYCSW_HOME/src
