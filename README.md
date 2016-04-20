@@ -1,4 +1,3 @@
-=================================
 Catalog CKAN docker installation
 =================================
 Trying to get catalog ckan into docker. The Dockerfiles are pretty much translated line by line from ansible playbook in pure-ansible branch, all code and package versions are (tried to) strictly kept same.
@@ -45,7 +44,7 @@ If you are not sure what these are about, just run it. It does not hurt to run m
 docker-compose run --rm fe ckan --plugin=ckanext-report report initdb
   - to set up db table for ckanext-report extension.
 
-docker-compose run --rm fe /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw setup -p /etc/pycsw/pycsw-all.cfg
+docker-compose run --rm pycsw /usr/lib/pycsw/bin/pycsw-ckan.py -c setup_db -f /etc/pycsw/pycsw-all.cfg
   - to set up pycsw tables, if needed.
 
 docker cp saxon-license.lic ckan_fgdc2iso_1:/etc/saxon-license/
@@ -83,14 +82,13 @@ docker-compose run --rm worker ckan --plugin=ckanext-geodatagov geodatagov combi
 
 docker-compose run --rm worker ckan --plugin=ckanext-geodatagov geodatagov export-csv
 
-docker-compose run --rm worker /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw set_keywords -p /etc/pycsw/pycsw-collection.cfg
+docker-compose run --rm pycsw /usr/lib/pycsw/bin/pycsw-ckan.py -c set_keywords -f /etc/pycsw/pycsw-collection.cfg
 
-docker-compose run --rm worker /usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw set_keywords -p /etc/pycsw/pycsw-all.cfg
+docker-compose run --rm pycsw /usr/lib/pycsw/bin/pycsw-ckan.py -c set_keywords -f /etc/pycsw/pycsw-all.cfg
 
-docker-compose run --rm worker /usr/lib/ckan/bin/python /usr/lib/ckan/bin/pycsw-db-admin.py reindex_fts /etc/pycsw/pycsw-all.cfg
+docker-compose run --rm pycsw /usr/lib/pycsw/bin/pycsw-db-admin.py reindex_fts /etc/pycsw/pycsw-all.cfg
 
-docker-compose run --rm worker sh -c "/usr/lib/ckan/bin/paster --plugin=ckanext-spatial ckan-pycsw load -p /etc/pycsw/pycsw-all.cfg && /usr/lib/ckan/bin/python /usr/lib/ckan/bin/pycsw-db-admin.py vacuumdb /etc/pycsw/pycsw-all.cfg"
-  - Yeah I agree all these ckan-pycsw commands should be migrated into pycsw container.
+docker-compose run --rm pycsw sh -c "/usr/lib/pycsw/bin/pycsw-ckan.py -c load -f /etc/pycsw/pycsw-all.cfg && /usr/lib/pycsw/bin/pycsw-db-admin.py vacuumdb /etc/pycsw/pycsw-all.cfg"
 
 docker-compose run --rm worker ckan --plugin=ckanext-qa qa update_sel
 
