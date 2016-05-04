@@ -59,7 +59,7 @@ Harvesting
 
 Here is how to harvest. Run it every a few minutes:
 ```
-docker-compose run --rm worker sh -c "touch /var/log/harvester_run.log && ckan --plugin=ckanext-harvest harvester run"
+docker-compose run --rm worker ckan --plugin=ckanext-harvest harvester run
 ```
 
 This will help speed up harvesting, give it a reasonable number:

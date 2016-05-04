@@ -35,7 +35,7 @@ RUN cd ckan && \
     ../../bin/pip install -r requirements.txt && \
     ../../bin/python setup.py develop
 
-RUN git clone -b 2.3-upgrade https://github.com/GSA/ckanext-harvest
+RUN git clone -b 2.3-upgrade https://github.com/GSA/ckanext-harvest #1
 RUN cd ckanext-harvest && \
     ../../bin/pip install -r pip-requirements.txt && \
     ../../bin/python setup.py develop
@@ -50,7 +50,7 @@ RUN cd ckanext-datajson && \
     ../../bin/pip install -r pip-requirements.txt && \
     ../../bin/python setup.py develop
 
-RUN git clone -b 2.3-upgrade https://github.com/GSA/ckanext-geodatagov
+RUN git clone -b 2.3-upgrade https://github.com/GSA/ckanext-geodatagov #1
 RUN cd ckanext-geodatagov && \
     ../../bin/pip install -r pip-requirements.txt && \
     ../../bin/python setup.py develop
