@@ -2,7 +2,8 @@ version: '2'
 
 volumes:
   worklog:
-  worktmp:
+  ckantmp:
+  apachelog:
 
 services:
   solr:
@@ -41,8 +42,8 @@ services:
       - "catalog.data.gov:127.0.0.1"
     volumes:
       - ./configs/ckan:/etc/ckan
-      - ./configs/pycsw:/etc/pycsw
-      - worktmp:/var/tmp/ckan
+      - ckantmp:/var/tmp/ckan
+      - apachelog:/var/log/apache2
     links:
       - postgres
       - solr
@@ -56,9 +57,8 @@ services:
       - fe:catalog.data.gov
     volumes:
       - worklog:/var/log
-      - worktmp:/var/tmp/ckan
+      - ckantmp:/var/tmp/ckan
       - ./configs/ckan:/etc/ckan
-      - ./configs/pycsw:/etc/pycsw
 
   pycsw:
     build: ./pycsw

@@ -3,7 +3,7 @@ FROM ubuntu:14.04
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql-9.3 postgis postgresql-9.3-postgis-2.1
 
 # Add locations data
-ADD http://packages.reisys.com/ckan/locations.sql.gz /tmp/
+ADD ./locations.sql.gz /tmp/
 RUN chown postgres /tmp/locations.sql.gz
 
 USER postgres
