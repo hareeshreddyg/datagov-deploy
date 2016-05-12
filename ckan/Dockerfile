@@ -50,7 +50,7 @@ RUN cd ckanext-datajson && \
     ../../bin/pip install -r pip-requirements.txt && \
     ../../bin/python setup.py develop
 
-RUN git clone -b 2.3-upgrade https://github.com/GSA/ckanext-geodatagov #2
+RUN git clone -b 2.3-upgrade https://github.com/GSA/ckanext-geodatagov #3
 RUN cd ckanext-geodatagov && \
     ../../bin/pip install -r pip-requirements.txt && \
     ../../bin/python setup.py develop
@@ -78,7 +78,6 @@ RUN cd ckanext-googleanalyticsbasic && \
     ../../bin/python setup.py develop
 
 RUN mkdir /var/tmp/ckan && chown www-data:www-data /var/tmp/ckan
-RUN ln -s /var/tmp/ckan/usasearch-custom-feed.xml $CKAN_HOME/src/ckan/ckan/public/usasearch-custom-feed.xml
 RUN ln -s /var/tmp/ckan/csv $CKAN_HOME/src/ckan/ckan/public/csv
 
 RUN rm -f /etc/apache2/sites-enabled/000-default.conf
