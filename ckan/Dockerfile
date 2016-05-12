@@ -50,7 +50,7 @@ RUN cd ckanext-datajson && \
     ../../bin/pip install -r pip-requirements.txt && \
     ../../bin/python setup.py develop
 
-RUN git clone -b 2.3-upgrade https://github.com/GSA/ckanext-geodatagov #3
+RUN git clone -b 2.3-upgrade https://github.com/GSA/ckanext-geodatagov #4
 RUN cd ckanext-geodatagov && \
     ../../bin/pip install -r pip-requirements.txt && \
     ../../bin/python setup.py develop
