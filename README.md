@@ -14,7 +14,7 @@ Included in this Repository:
     - GSA IT Security Agents
     - Fluentd (Logging)
 
-## Project Status
+## Status
 
 | Milestone | Status | Target Date |
 | --- | --- | --- |
@@ -30,25 +30,61 @@ Included in this Repository:
 | Infrastructure Switch Over | <img src="https://img.shields.io/badge/status-Completed-brightgreen.svg" />| 12/29/2016 |
 | Start of 1 year Authority to Operate | <img src="https://img.shields.io/badge/status-On%20Track-blue.svg" />  | 1/2/2017 |
 
-# Requirements for Infrastructure and Software Provisioning
-- Ansible > 1.10
-- SSH access (via keypair) to remote instances
-- boto3 (for infrastructure provisioning only): https://github.com/boto/boto3
-- ansible-secret.txt: `export ANSIBLE_VAULT_PASSWORD_FILE=~/ansible-secret.txt`
-- run all provisioning/app deployment commands from repo's `ansible` folder
-- for wordpress/dashboard/crm/monitoring/jekyll run the following command within the role's root folder before you provision anything: `ansible-galaxy install -r requirements.yml`
-- {{ inventory }} can be:
-  - inventories/staging/hosts
-  - inventories/production/hosts
-  - inventories/local/hosts
+## Testing
+`Status - Concept/Work in Progress WIP`
+Data.gov is testing the use of [Test Kitchen](http://kitchen.ci/docs/getting-started/installing) to test our Ansible roles and integrate them into Continuous Integration (CI) - Inspired by http://github.com/dev-sec
 
-# Provision Infrastructure
+### Requirements/Setup
+
+#### Install rvm 
+with curl (*not reccommended)
+`curl -sSL https://get.rvm.io | bash -s stable`
+
+Install [rvm](https://rvm.io/) manually (*reccomended)
+`rvm install stable && rvm use stable`
+
+#### Install Test Kitchen
+```
+gem install bundler
+bundle install
+```
+
+### Testing with Docker
+```
+# fast test on one machine
+bundle exec kitchen test default-ubuntu-1404
+
+# test on all machines
+bundle exec kitchen test
+
+# for development
+bundle exec kitchen create default-ubuntu-1404
+bundle exec kitchen converge default-ubuntu-1404
+```
+
+### Testing with Virtualbox
+```
+# fast test on one machine
+KITCHEN_YAML=".kitchen.vagrant.yml" bundle exec kitchen test default-ubuntu-1404
+
+# test on all machines
+KITCHEN_YAML=".kitchen.vagrant.yml" bundle exec kitchen test
+
+# for development
+KITCHEN_YAML=".kitchen.vagrant.yml" bundle exec kitchen create default-ubuntu-1404
+KITCHEN_YAML=".kitchen.vagrant.yml" bundle exec kitchen converge default-ubuntu-1404
+```
+For more information see [test-kitchen](http://kitchen.ci/docs/getting-started)
+
+## Deployment 
+
+### Provision Infrastructure
 Moved to [datagov-infrastructure](https://github.com/gsa/datagov-infrastructure)
 
-# Provision apps
+### Provision Applications
 cd /catalog-deploy/ansible and us -i "inventory/../hosts" flag to run playbooks w/ `ansible-playbook --help` or as` ansible all -a "cmd"` to run a one-off command on all hosts (only suggested for `-m ping` for query/stats/services all installation and configuration is done using playbooks)
 
-## Wordpress:
+#### Data.gov (Wordpress - latest):
 
 **provision vm & deploy app:** `ansible-playbook datagov-web.yml -i {{ inventory }} --tags="provision" --limit wordpress-web`
 
@@ -60,7 +96,7 @@ cd /catalog-deploy/ansible and us -i "inventory/../hosts" flag to run playbooks 
   
   ***e.g.*** `ansible-playbook datagov-web.yml -i inventories/staging/hosts --tags=deploy --limit wordpress-web -e project_git_version=develop`
 
-## Dashboard
+#### labs.data.gov/dashboard (Project Open Data Dashboard)
 
 **provision vm & deploy app:** `ansible-playbook dashboard-web.yml -i {{ inventory }} --tags="provision" --limit dashboard-web`
 
@@ -68,7 +104,7 @@ cd /catalog-deploy/ansible and us -i "inventory/../hosts" flag to run playbooks 
 
 **deploy rollback:** `ansible-playbook dashboard-web.yml -i {{ inventory }} --tags="deploy-rollback"`
 
-## CRM
+#### labs.data.gov/crm
 
 **provision vm & deploy app:** `ansible-playbook crm-web.yml -i {{ inventory }} --tags="provision" --limit crm-web`
 
@@ -76,7 +112,7 @@ cd /catalog-deploy/ansible and us -i "inventory/../hosts" flag to run playbooks 
 
 **deploy rollback:** `ansible-playbook crm-web.yml -i {{ inventory }} --tags="deploy-rollback"`
 
-## Catalog:
+#### Catalog.data.gov (CKAN v2.3):
 
 **provision vm - web:** `ansible-playbook catalog.yml -i {{ inventory }} --tags="frontend,ec2" --skip-tags="solr,db,cron" --limit catalog-web`
 
@@ -84,34 +120,38 @@ cd /catalog-deploy/ansible and us -i "inventory/../hosts" flag to run playbooks 
 
 **provision vm - solr:** `ansible-playbook catalog.yml -i {{ inventory }} --tags="solr,secops,trendmicro,misc" --limit solr`
 
-## Inventory
+#### Inventory.data.gov (CKAN v 2.5)
 
 **provision vm && deploy app:** `ansible-playbook inventory.yml -i {{ inventory }} --skip-tags="solr,db,deploy-rollback" --limit inventory-web`
 
 **provision vm - solr:** `ansible-playbook inventory.yml -i {{ inventory }} --tags="solr,secops,trendmicro,misc" --limit solr`
 
-## Jekyll
+#### static.data.gov (Jekyll Static Site Builder)
 
 **provision vm && deploy app:** `ansible-playbook jekyll.yml -i {{ inventory }} --limit jekyll-web`
 
-## ElasticSearch
+#### All Services 
+
+##### ElasticSearch
 
 **provision vm && deploy app:** `ansible-playbook elasticsearch.yml -i {{ inventory }}`
 
-## Kibana
+##### Kibana
 
 **provision vm && deploy app:** `ansible-playbook kibana.yml -i {{ inventory }}`
 
-## EFK nginx
+##### EFK nginx
 
 **provision vm && deploy app:** `ansible-playbook efk_nginx.yml -i {{ inventory }}`
 
-## Common:
+##### Common:
 **install the trendmicro agent:** `ansible-playbook trendmicro.yml -i {{ inventory }}`
 
 **Add SecOps user:** `ansible-playbook secops.yml -i {{ inventory }}`
 
-## Upgrade ubuntu VMs:
+## Troubleshooting:
+
+**Upgrade ubuntu VMs**
 `ansible all -m shell -a "apt-get update && apt-get dist-upgrade" --sudo`
 
 `ansible all -m shell -a "service tomcat6 restart" --sudo`
@@ -120,7 +160,6 @@ cd /catalog-deploy/ansible and us -i "inventory/../hosts" flag to run playbooks 
 
 `ansible all -m shell -a "/usr/bin/killall dhclient && dhclient -1 -v -pf /run/dhclient.eth0.pid -lf /var/lib/dhcp/dhclient.eth0.leases eth0" --sudo`
 
-## Troubleshooting:
 **dpkg errors**:
 
 `sed -i '/postdrop/d' /var/lib/dpkg/statoverride`
