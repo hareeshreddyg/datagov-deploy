@@ -1,0 +1,138 @@
+---
+
+- name: Ensure dependencies for building from source are installed (nignx)
+  apt: "pkg={{ item }} state=installed"
+  with_items:
+    - make
+    - shibboleth-sp2-utils
+    - supervisor
+
+- name: Creates /var/log/shibboleth directory
+  file: path=/var/log/shibboleth state=directory mode=0600 group=_shibd owner=_shibd
+
+- name: Downloads metadata into metadata directory as backup
+  get_url: >
+    url={{ shibboleth.idp_entity_id }}
+    dest=/etc/shibboleth/idp.xml
+    mode=0640
+    group=_shibd
+    owner=_shibd
+
+- name: writes out key and pem file
+  template: src=shibboleth/sp.{{ item }}.j2 dest=/etc/shibboleth/sp.{{ item }}  group=_shibd owner=_shibd mode=0600
+  with_items:
+    - key
+    - pem
+  notify: restart shibd
+
+- name: writes out configuration files
+  template: src=shibboleth/{{ item }} dest=/etc/shibboleth/{{ item }}  group=_shibd owner=_shibd mode=0644
+  with_items:
+#    - attribute-map.xml
+    - shibboleth2.xml
+  notify: restart shibd
+
+- name: setup supervisor for fastcgi socks
+  template:
+    src: shibboleth/shib-supervisor.conf
+    dest: /etc/supervisor/conf.d/shib.conf
+  notify: restart supervisor
+
+- name: Get required sources
+  unarchive: "src={{ item }} dest=/tmp remote_src=yes"
+  with_items:
+    - ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.40.tar.gz
+    - http://zlib.net/zlib-1.2.11.tar.gz
+    - https://www.openssl.org/source/openssl-1.0.2l.tar.gz
+    - https://github.com/nginx-shib/nginx-http-shibboleth/archive/v2.0.1.tar.gz
+    - http://nginx.org/download/nginx-1.11.13.tar.gz
+
+- name: Install PCRE lib
+  shell: ./configure && make && make install
+  args:
+    chdir: /tmp/pcre-8.40
+  tags: skip_ansible_lint
+
+- name: Install zlib lib
+  shell: ./configure && make && make install
+  args:
+    chdir: /tmp/zlib-1.2.11
+  tags: skip_ansible_lint
+
+- name: Install openssl lib
+  shell: ./config --prefix=/usr && make && make install
+  args:
+    chdir: /tmp/openssl-1.0.2l
+  tags: skip_ansible_lint
+
+- name: Add nginx user
+  user:
+    name: nginx
+
+- name: Install and compile nginx
+  shell: |
+    ./configure \
+      --prefix=/usr/local/nginx \
+      --sbin-path=/usr/sbin/nginx \
+      --conf-path=/etc/nginx/nginx.conf \
+      --error-log-path=/var/log/nginx/error.log \
+      --http-log-path=/var/log/nginx/access.log \
+      --pid-path=/var/run/nginx.pid \
+      --user=nginx \
+      --group=nginx \
+      --lock-path=/run/lock/subsys/nginx \
+      --with-pcre=../pcre-8.40 \
+      --with-zlib=../zlib-1.2.11 \
+      --with-http_ssl_module \
+      --with-stream \
+      --with-mail=dynamic \
+      --add-module=/tmp/nginx-http-shibboleth-2.0.1
+    make
+    make install
+  args:
+    chdir: /tmp/nginx-1.11.13
+  tags: skip_ansible_lint
+
+- name: Nginx config folder
+  file:
+    path: /etc/nginx/sites-enabled
+    state: directory
+
+- name: Copy nginx config
+  template:
+    src: nginx/nginx.conf
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+
+- name: Copy nginx vhost
+  template:
+    src: nginx/nginx-vhost.conf
+    dest: /etc/nginx/sites-enabled/monitoring.conf
+    mode: '0644'
+
+- name: Add nginx service
+  template:
+    src: nginx/nginx.service
+    dest: /lib/systemd/system/nginx.service
+    mode: '0644'
+  register: nginx_service_added
+
+- name: Reload systemctl daemon
+  command: systemctl daemon-reload
+  when: nginx_service_added is defined
+
+- name: Restart shibd
+  service: name=shibd state=restarted
+
+- name: Restart nginx
+  service: name=nginx state=restarted
+
+#- fail: msg="success"
+
+- name: Copy .htpasswd
+  template:
+    src: nginx/.htpasswd.j2
+    dest: /etc/nginx/.htpasswd
+    mode: '0755'
+  notify:
+    - restart nginx

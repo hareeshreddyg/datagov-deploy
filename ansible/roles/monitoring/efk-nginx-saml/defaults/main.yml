@@ -1,0 +1,49 @@
+---
+
+basic_auth_user: user
+basic_auth_hash: password
+
+# NGinx
+letsencrypt: false
+nginx_hostname: manage.vasili4.com
+
+#defaultng to use testshib.org
+shibboleth:
+  sp_entity_id: 'https://manage.vasili4.com/shibboleth'
+  idp_entity_id: 'https://idp.testshib.org/idp/shibboleth'
+  # openssl genrsa -out sp.key 1024
+  # openssl req -new -x509 -key sp.key -out sp.pem
+  sp_key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIICXgIBAAKBgQC146880veX87RHTBpHthiNg+0CnU4FBaEyAFgxe5iBDY9aq6e4
+    qNnbDi3KiWYcGo9duHB4NdWBVcq2wkH0jrDt2ibqwZ/tGh8N1ZcP0P6SaGty4Ffb
+    0huvabxwzS0JIQek8XFkEszmfoayw+sT2gSzeC2dDHs21kmwKvocksuYiwIDAQAB
+    AoGBAKUBCQ7Xn88UQV5QlqKpefqfTJqLk6SQp9wRXfB93Cpu37Z0dHHbk87aPQY4
+    wQ4LtjViRX138NkkuAI1ldnCvJNxk1nlOqtkoWtfCO1/bhoWLnC3zqo16OjVi0xw
+    wGVqK9ZAd+D2bpg+Q0AeTfhUyLGjtlGGIBUnvT/aKJmb8C1pAkEA5S5qqUmKMzrG
+    xuDDkFT5jOYshIqfVJDb0cfiilW+LN7ow2QCXtTrxoEKR9VBCzQWhTUaYRwYV7Fl
+    HiNAkfBjDQJBAMssi0VPdJbgJNUAuk1DalOUkv+nP9aCv+5HpJHisJnpA6PBDHhh
+    g74VLM/aLwdj6rd0V+sWhjzktTPJ6ZhGY/cCQQDIyS7HW9eJZIBMMxUC+X+c8vej
+    s3M9+p+rngyal95Cn5Sbwp3VCYP7aIhiQLJ4p0znrYuL8rpc8d0eV1I1yb5tAkAH
+    Tc6j6ztRwTURwzjvViEYaBrwvd55o7Gqq0CrTe7zWYEb/fCo0zidOL2nqzxNk7X4
+    amJOvTyOK9qnxfZz1vP5AkEArLWOsR9ttBAtmdKcNP8I4OVSUHCofTfFw3gjY4IZ
+    jLBtAzZL8Rt8XDiGutF4Zxz/QJWkU1EWbHOfIs5hac/uHA==
+    -----END RSA PRIVATE KEY-----
+  sp_pem: |
+    -----BEGIN CERTIFICATE-----
+    MIICxDCCAi2gAwIBAgIJALD56bWkMZT0MA0GCSqGSIb3DQEBCwUAMHsxCzAJBgNV
+    BAYTAnVzMQswCQYDVQQIDAJ2YTERMA8GA1UEBwwIc3RlcmxpbmcxDDAKBgNVBAoM
+    A2dzYTEMMAoGA1UECwwDZ3NhMQ0wCwYDVQQDDARhbGV4MSEwHwYJKoZIhvcNAQkB
+    FhJ2YS5zaWxpNEBnbWFpbC5jb20wHhcNMTcwNzEyMDc0MDU5WhcNMTcwODExMDc0
+    MDU5WjB7MQswCQYDVQQGEwJ1czELMAkGA1UECAwCdmExETAPBgNVBAcMCHN0ZXJs
+    aW5nMQwwCgYDVQQKDANnc2ExDDAKBgNVBAsMA2dzYTENMAsGA1UEAwwEYWxleDEh
+    MB8GCSqGSIb3DQEJARYSdmEuc2lsaTRAZ21haWwuY29tMIGfMA0GCSqGSIb3DQEB
+    AQUAA4GNADCBiQKBgQC146880veX87RHTBpHthiNg+0CnU4FBaEyAFgxe5iBDY9a
+    q6e4qNnbDi3KiWYcGo9duHB4NdWBVcq2wkH0jrDt2ibqwZ/tGh8N1ZcP0P6SaGty
+    4Ffb0huvabxwzS0JIQek8XFkEszmfoayw+sT2gSzeC2dDHs21kmwKvocksuYiwID
+    AQABo1AwTjAdBgNVHQ4EFgQU/9rnDvCBp+/tt7ZCF9q+nlzjZzswHwYDVR0jBBgw
+    FoAU/9rnDvCBp+/tt7ZCF9q+nlzjZzswDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0B
+    AQsFAAOBgQChi9XUL4qtE8TTl7Ih7SvFHq9zzPK8ruhUzKW5hyDp6oILLQh9MPzH
+    MiDnSAtA68X6E7DQum3PGpg/yYXZeACmXtX+pneqDVaG797NBkCr8pKKMdY9FoSg
+    Y0r/hHn0tLJ68T0cjmIDsCKxPg8sFj3hZG/CLEOnjNNhY9ZzH39J1w==
+    -----END CERTIFICATE-----

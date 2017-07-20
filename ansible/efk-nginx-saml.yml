@@ -1,0 +1,9 @@
+---
+- name: Install EFK nginx proxy
+  hosts: efk_nginx
+  become: yes
+  become_method: sudo
+  remote_user: ubuntu
+
+  roles:
+  - { role: monitoring/efk-nginx-saml, tags: [provision] }

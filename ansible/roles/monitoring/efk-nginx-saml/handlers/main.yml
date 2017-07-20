@@ -1,0 +1,9 @@
+---
+- name: restart shibd
+  service: name=shibd state=restarted
+
+- name: restart nginx
+  service: name=nginx state=restarted
+
+- name: restart supervisor
+  service: name=supervisor state=restarted
