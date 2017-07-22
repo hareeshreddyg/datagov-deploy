@@ -5,6 +5,8 @@
   with_items:
     - make
     - supervisor
+    - libpcre3
+    - libpcre3-dev
 
 - name: Install Ubuntu 16.04 shibboleth sp2
   apt: "pkg={{ item }} state=installed"
@@ -53,17 +55,10 @@
 - name: Get required sources
   unarchive: "src={{ item }} dest=/tmp remote_src=yes"
   with_items:
-    - ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.40.tar.gz
     - http://zlib.net/zlib-1.2.11.tar.gz
     - https://www.openssl.org/source/openssl-1.0.2l.tar.gz
     - https://github.com/nginx-shib/nginx-http-shibboleth/archive/v2.0.1.tar.gz
     - http://nginx.org/download/nginx-1.11.13.tar.gz
-
-- name: Install PCRE lib
-  shell: ./configure && make && make install
-  args:
-    chdir: /tmp/pcre-8.40
-  tags: skip_ansible_lint
 
 - name: Install zlib lib
   shell: ./configure && make && make install
@@ -93,7 +88,7 @@
       --user=nginx \
       --group=nginx \
       --lock-path=/run/lock/subsys/nginx \
-      --with-pcre=../pcre-8.40 \
+      --with-pcre \
       --with-zlib=../zlib-1.2.11 \
       --with-http_ssl_module \
       --with-stream \
