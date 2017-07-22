@@ -4,8 +4,20 @@
   apt: "pkg={{ item }} state=installed"
   with_items:
     - make
-    - shibboleth-sp2-utils
     - supervisor
+
+- name: Install Ubuntu 16.04 shibboleth sp2
+  apt: "pkg={{ item }} state=installed"
+  with_items:
+    - shibboleth-sp2-utils
+  when: ansible_distribution_version == '16.04'
+
+- name: Install Ubuntu 14.04 shibboleth sp2
+  apt: "pkg={{ item }} state=installed"
+  with_items:
+    - build-essential
+    - libapache2-mod-shib2
+  when: ansible_distribution_version == '14.04'
 
 - name: Creates /var/log/shibboleth directory
   file: path=/var/log/shibboleth state=directory mode=0600 group=_shibd owner=_shibd
@@ -110,19 +122,33 @@
     dest: /etc/nginx/sites-enabled/monitoring.conf
     mode: '0644'
 
-- name: Add nginx service
+- name: Add nginx service (Ubuntu 16.04)
   template:
     src: nginx/nginx.service
     dest: /lib/systemd/system/nginx.service
     mode: '0644'
   register: nginx_service_added
+  when: ansible_distribution_version == '16.04'
 
-- name: Reload systemctl daemon
+- name: Reload systemctl config (Ubuntu 16.04)
   command: systemctl daemon-reload
-  when: nginx_service_added is defined
+  when: ansible_distribution_version == '16.04' and nginx_service_added is defined
+
+- name: Add nginx service (Ubuntu 14.04)
+  template:
+    src: nginx/daemon.u14.04.conf
+    dest: /etc/init/nginx.conf
+    mode: '0644'
+  register: nginx_service_added
+  when: ansible_distribution_version == '14.04'
+
+- name: Reload upstart config (Ubuntu 14.04)
+  command: initctl reload-configuration
+  when: ansible_distribution_version == '14.04' and nginx_service_added is defined
 
 - name: Restart shibd
   service: name=shibd state=restarted
+  notify: restart supervisor
 
 - name: Restart nginx
   service: name=nginx state=restarted

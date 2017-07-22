@@ -8,4 +8,4 @@ dashboard.aws
 datagov.aws
 
 [efk_nginx]
-manage.vasili4.com ansible_ssh_port=22 ansible_ssh_host=test.nginx ansible_ssh_user=ubuntu ansible_python_interpreter=/usr/bin/python3
+manage.vasili4.com ansible_ssh_port=22 ansible_ssh_host=manage.vasili4.com ansible_ssh_user=ubuntu ansible_python_interpreter=/usr/bin/python3
