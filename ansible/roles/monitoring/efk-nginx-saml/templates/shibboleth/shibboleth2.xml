@@ -22,6 +22,7 @@
     <RequestMapper type="XML">
         <RequestMap>
             <Host name="{{ nginx_hostname }}"
+                  authnContextClassRef="{{ shibboleth.authn_context_2_factor }}"
                   authType="shibboleth"
                   requireSession="true">
                 <Path name="/" />

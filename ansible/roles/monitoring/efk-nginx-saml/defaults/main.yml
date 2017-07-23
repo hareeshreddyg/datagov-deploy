@@ -11,6 +11,7 @@ nginx_hostname: manage.vasili4.com
 shibboleth:
   sp_entity_id: 'https://manage.vasili4.com/shibboleth'
   idp_entity_id: 'https://idp.testshib.org/idp/shibboleth'
+  authn_context_2_factor: ''
   # openssl genrsa -out sp.key 1024
   # openssl req -new -x509 -key sp.key -out sp.pem
   sp_key: |
