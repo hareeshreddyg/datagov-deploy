@@ -1,23 +1,44 @@
 ---
 
-- name: Ensure dependencies for building from source are installed (nignx)
-  apt: "pkg={{ item }} state=installed"
+- name: Removing previous configs
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/shibboleth
+    - /etc/nginx
+
+- name: Ensure dependencies for building from source are installed (to compile nignx)
+  apt: "pkg={{ item }} state=installed update_cache=yes"
   with_items:
     - make
     - supervisor
     - libpcre3
     - libpcre3-dev
 
-- name: Install Ubuntu 16.04 shibboleth sp2
+- name: Remove any installed shibboleth sp2 ( Ubuntu 16.04 )
+  apt: "pkg={{ item }} state=absent purge=yes"
+  with_items:
+    - shibboleth-sp2-utils
+  when: ansible_distribution_version == '16.04'
+
+- name: Install shibboleth sp2 ( Ubuntu 16.04 )
   apt: "pkg={{ item }} state=installed"
   with_items:
     - shibboleth-sp2-utils
   when: ansible_distribution_version == '16.04'
 
-- name: Install Ubuntu 14.04 shibboleth sp2
+- name: Remove any installed shibboleth sp2 ( Ubuntu 14.04 )
+  apt: "pkg={{ item }} state=absent purge=yes"
+  with_items:
+    - libapache2-mod-shib2
+  when: ansible_distribution_version == '14.04'
+
+- name: Install shibboleth sp2 ( Ubuntu 14.04 )
   apt: "pkg={{ item }} state=installed"
   with_items:
     - build-essential
+    - shibboleth-sp2-schemas
     - libapache2-mod-shib2
   when: ansible_distribution_version == '14.04'
 
@@ -27,16 +48,16 @@
 - name: Downloads metadata into metadata directory as backup
   get_url: >
     url={{ shibboleth.idp_entity_id }}
-    dest=/etc/shibboleth/idp.xml
+    dest=/etc/shibboleth/metadata.xml
     mode=0640
     group=_shibd
     owner=_shibd
 
 - name: writes out key and pem file
-  template: src=shibboleth/sp.{{ item }}.j2 dest=/etc/shibboleth/sp.{{ item }}  group=_shibd owner=_shibd mode=0600
+  template: src=shibboleth/{{ item }} dest=/etc/shibboleth/{{ item }}  group=_shibd owner=_shibd mode=0600
   with_items:
-    - key
-    - pem
+    - sp-cert.pem
+    - sp-key.pem
   notify: restart shibd
 
 - name: writes out configuration files
@@ -45,6 +66,7 @@
 #    - attribute-map.xml
     - shibboleth2.xml
   notify: restart shibd
+  tags: asdf
 
 - name: setup supervisor for fastcgi socks
   template:
@@ -59,6 +81,11 @@
     - https://www.openssl.org/source/openssl-1.0.2l.tar.gz
     - https://github.com/nginx-shib/nginx-http-shibboleth/archive/v2.0.1.tar.gz
     - http://nginx.org/download/nginx-1.11.13.tar.gz
+
+- name: Generate self signed ssl certs
+  command: openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=US/ST=Oregon/L=Portland/O=GSA/OU=Org/CN=www.example.com"
+  args:
+    chdir: /etc/ssl
 
 - name: Install zlib lib
   shell: ./configure && make && make install
