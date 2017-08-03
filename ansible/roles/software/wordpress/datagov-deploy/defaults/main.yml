@@ -48,7 +48,7 @@ saml_idp_sso: "https://localhost/idp/profile/SAML2/POST/SSO"
 saml_idp_slo: "https://localhost/idp/profile/SAML2/POST/SLO"
 saml_auth_adminpassword: "insecure"
 saml_secretsalt: "insecure"
-saml_idp_cert_fprint: "7A43DACB95D67FB6A804FD37C8A7DCA5B0384939"
+saml2_idp_cert_fprint: "7A43DACB95D67FB6A804FD37C8A7DCA5B0384939"
 saml2_sp_public_key: "add-yours-to-inventory"
 saml2_sp_private_pem: "add-yours-to-inventory"
 # s3

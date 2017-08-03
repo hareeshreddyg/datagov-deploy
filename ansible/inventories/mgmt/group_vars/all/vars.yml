@@ -12,3 +12,7 @@ shibboleth:
   # openssl req -new -x509 -key sp.key -out sp.pem
   sp_cert: "{{ vault_saml2_sp_public_key }}"
   sp_key: "{{ vault_saml2_sp_private_pem }}"
+
+# web self-signed ssl stuff
+web_crt: "{{ vault_web_crt }}"
+web_key: "{{ vault_web_key }}"
