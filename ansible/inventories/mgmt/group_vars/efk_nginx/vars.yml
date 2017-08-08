@@ -13,7 +13,7 @@ nginx_vhosts:
 
 # NGinx
 nginx_hostname: "{{ inventory_hostname }}"
-public_domain: "manage.vasili4.com"
+public_domain: "manage.data.gov"
 
 basic_auth_user: "{{ basic_auth_user }}"
 basic_auth_hash: "{{ basic_auth_hash }}"

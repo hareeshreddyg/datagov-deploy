@@ -4,7 +4,7 @@ basic_auth_user: user
 basic_auth_hash: password
 
 # NGinx
-nginx_hostname: manage.vasili4.com
+nginx_hostname: manage.data.gov
 public_domain: "{{ nginx_hostname }}"
 
 #defaultng to use testshib.org

@@ -4,8 +4,7 @@ trendmicro_policy_id_mgmt_web: "{{ vault_trendmicro_policy_id_mgmt_web }}"
 
 # Max SAML
 shibboleth:
-#  sp_entity_id: 'https://manage.data.gov'
-  sp_entity_id: 'https://manage.vasili4.com'
+  sp_entity_id: 'https://manage.data.gov'
   idp_entity_id: 'https://login.max.gov/idp/shibboleth'
   authn_context_2_factor: 'https://max.gov/icam/2015/10/securityLevels/securePlus2'
   # openssl genrsa -out sp.key 1024
