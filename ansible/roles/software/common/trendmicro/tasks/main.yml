@@ -19,18 +19,18 @@
 - name: start trendmicro agent @ web tier
   command: /opt/ds_agent/dsa_control -a dsm://dsm.sec.helix.gsa.gov:4120/ "policyid:{{ trendmicro_policy_id_web }}"
   when: |
-    (inventory_hostname in groups["catalog-web"]) or
-    (inventory_hostname in groups["inventory-web"]) or
-    (inventory_hostname in groups["crm-web"]) or
-    (inventory_hostname in groups["dashboard-web"]) or
-    (inventory_hostname in groups["wordpress-web"]) or
-    (inventory_hostname in groups["jekyll-web"])
+    (("catalog-web" in groups) and inventory_hostname in groups["catalog-web"]) or
+    (("inventory-web" in groups) and inventory_hostname in groups["inventory-web"]) or
+    (("crm-web" in groups) and inventory_hostname in groups["crm-web"]) or
+    (("dashboard-web" in groups) and inventory_hostname in groups["dashboard-web"]) or
+    (("wordpress-web" in groups) and  inventory_hostname in groups["wordpress-web"]) or
+    (("jekyll-web" in groups) and inventory_hostname in groups["jekyll-web"])
 
 - name: start trendmicro agent @ app tier
   command: /opt/ds_agent/dsa_control -a dsm://dsm.sec.helix.gsa.gov:4120/ "policyid:{{ trendmicro_policy_id_app }}"
   when: |
-    (inventory_hostname in groups["solr"]) or
-    (inventory_hostname in groups["catalog-harvester"])
+    (("solr" in groups) and inventory_hostname in groups["solr"]) or
+    (("catalog-harvester" in groups) and inventory_hostname in groups["catalog-harvester"])
 
 - name: start trendmicro agent @ mgmt web tier
   command: /opt/ds_agent/dsa_control -a dsm://dsm.sec.helix.gsa.gov:4120/ "policyid:{{ trendmicro_policy_id_mgmt_web }}"
