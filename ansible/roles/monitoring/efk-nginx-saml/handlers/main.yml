@@ -7,4 +7,3 @@
 
 - name: restart supervisor
   service: name=supervisor state=restarted
-  ignore_errors: yes
