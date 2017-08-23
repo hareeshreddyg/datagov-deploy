@@ -6,5 +6,6 @@
   remote_user: ubuntu
 
   roles:
+  - { role: software/ubuntu/common, tags: ['always'] }
   - { role: monitoring/efk-nginx-saml, tags: [provision] }
   - { role: software/common/trendmicro, tags: [provision, trendmicro, prod] }
