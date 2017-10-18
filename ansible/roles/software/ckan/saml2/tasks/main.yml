@@ -23,10 +23,10 @@
   tags: skip_ansible_lint
 
 - name: create directories
-  action: file path=/etc/ckan/saml2/ state=directory mode=0755
-
-- name: copy all needed files
-  action: copy src=etc/ckan/saml2/ dest=/etc/ckan/saml2/
+  action: file path={{item}} state=directory mode=0755
+  with_items:
+    - /etc/ckan/saml2
+    - /etc/ckan/saml2/pki
 
 - name: template all needed files
   action: template src=etc/ckan/{{item}} dest=/etc/ckan/{{item}}

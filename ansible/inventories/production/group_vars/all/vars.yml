@@ -72,3 +72,6 @@ web_key: "{{ vault_web_key }}"
 # ckan
 # Auth cookie `auth_tkt` must be HTTPS-only (SECURE) on Production
 who_secure: True
+
+# enabled on prod
+trendmicro_enabled: true

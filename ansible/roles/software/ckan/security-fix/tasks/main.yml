@@ -6,7 +6,8 @@
   action: pip name=requests version=2.6.0 virtualenv=/usr/lib/ckan/
 
 - name: fix /etc/ckan & /usr/lib/ckan permissions
-  file: path={{ item }} state=directory group=www-data recurse=yes
+  file: path={{ item }} state=directory owner=ckan group=www-data recurse=yes
   with_items:
     - /etc/ckan
+    - /var/tmp/ckan
     - "{{ project_source_new_code_path }}"

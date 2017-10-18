@@ -51,14 +51,14 @@
     src: solrconfig-master.xml.j2
     dest: /home/solr/{{app_type}}/conf/solrconfig.xml
     force: yes
-  when: inventory_hostname == groups["solr"][0]
+  when: ("solr" in groups)  and inventory_hostname == groups["solr"][0]
 
 - name: Copy solrconfig.xml on slave solr
   template:
     src: solrconfig-slave.xml.j2
     dest: /home/solr/{{app_type}}/conf/solrconfig.xml
     force: yes
-  when: inventory_hostname != groups["solr"][0]
+  when: ("solr" in groups) and inventory_hostname != groups["solr"][0]
 
 - name: Setup solr permissions
   file:

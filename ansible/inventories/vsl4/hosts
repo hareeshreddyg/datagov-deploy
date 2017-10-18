@@ -7,3 +7,5 @@ dashboard.aws
 [wordpress-web]
 datagov.aws
 
+[catalog-web]
+catalog.aws

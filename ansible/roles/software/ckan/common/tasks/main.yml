@@ -12,3 +12,8 @@
   with_items:
     - etc/cron.daily/remove_old_sessions
   tags: ['cron']
+
+- name: create ckan user if not exists
+  user:
+    name: ckan
+    groups: www-data
