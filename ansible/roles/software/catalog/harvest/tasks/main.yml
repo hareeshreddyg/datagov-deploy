@@ -26,13 +26,20 @@
 
 - name: remove legacy /etc/cron.d/ckan
   file:
-    src: /etc/cron.d/ckan
+    path: /etc/cron.d/ckan
     state: absent
 
 - name: copy primary cron job
   copy: src=etc/cron.d/ckan-primary dest=/etc/cron.d/ckan
   when: ("catalog-harvester" in groups) and (groups["catalog-harvester"]|length == 1 or inventory_hostname == groups["catalog-harvester"][0])
   tags: ['cron']
+
+- name: ensure user ckan in cron.allow
+  lineinfile:
+    path: /etc/cron.allow
+    line: ckan
+    state: present
+  when: ("catalog-harvester" in groups) and (groups["catalog-harvester"]|length > 1 and inventory_hostname == groups["catalog-harvester"][1])
 
 - name: copy secondary cron job
 #  copy: src=etc/cron.d/ckan-secondary dest=/etc/cron.d/ckan
