@@ -39,6 +39,7 @@
     path: /etc/cron.allow
     line: ckan
     state: present
+    create: yes
   when: ("catalog-harvester" in groups) and (groups["catalog-harvester"]|length > 1 and inventory_hostname == groups["catalog-harvester"][1])
 
 - name: copy secondary cron job
