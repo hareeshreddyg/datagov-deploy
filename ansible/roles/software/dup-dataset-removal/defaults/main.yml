@@ -1,0 +1,11 @@
+---
+# defaults file for Delete duplicates
+
+script_name: "harvest-duplicates.py"
+script_dir: "/home/{{ remote_user }}/harvest_duplicates"
+script_path: "{{ script_dir }}/{{ script_name }}"
+
+python_executable_path: python
+
+datagov_url: "http://catalog-web-test.datagov.us"
+sysadmin_api_key: ""
