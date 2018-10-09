@@ -1,5 +1,5 @@
 ---
-# tasks file for Delete Duplicates
+# tasks file for run_script
 - name: "create directory {{ script_dir }} if not exist"
   file:
     path: "{{ script_dir }}"
