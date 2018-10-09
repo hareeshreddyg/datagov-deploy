@@ -1,5 +1,5 @@
 ---
-# tasks file for Duplicate datasets
+# tasks file for Delete Duplicates
 - name: "create directory {{ script_dir }} if not exist"
   file:
     path: "{{ script_dir }}"
@@ -11,6 +11,6 @@
     dest: "{{ script_path }}"
 
 - name: run python script
-  command: "{{ python_executable_path }} {{ script_name }} -H {{ CKAN_DB_SERVER }} -n {{ catalog_db_name }} -u {{ catalog_db_user }}' -p {{ catalog_db_pass }} -l {{ datagov_url }} -k {{ sysadmin_api_key }}"
+  command: "{{ python_executable_path }} {{ script_name }} -H {{ CKAN_DB_SERVER }} -n {{ catalog_db_name }} -u {{ catalog_db_user }} -p {{ catalog_db_pass }} -l {{ datagov_url }} -k {{ sysadmin_api_key }}"
   args:
     chdir: "{{ script_dir }}"
