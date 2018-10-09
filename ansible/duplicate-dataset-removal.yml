@@ -6,4 +6,4 @@
   become_method: sudo
 
   roles:
-  - { role: dup-dataset-removal, tags: [provision, misc] }
+  - { role: software/dup-dataset-removal, tags: [provision, misc] }
