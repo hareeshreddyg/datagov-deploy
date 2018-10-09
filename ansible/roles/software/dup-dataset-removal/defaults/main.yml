@@ -5,7 +5,7 @@ script_name: "harvest-duplicates.py"
 script_dir: "/home/{{ remote_user }}/harvest_duplicates"
 script_path: "{{ script_dir }}/{{ script_name }}"
 
-python_executable_path: python
+python_executable_path: /usr/bin/python
 
 datagov_url: "http://catalog-web-test.datagov.us"
 sysadmin_api_key: ""
