@@ -1,5 +1,5 @@
 ---
-- name: Run script to Delete the Duplicate Datasets
+- name: Run script to Delete Duplicate Datasets
   hosts:  catalog-web
   remote_user: ubuntu
   become: yes
