@@ -2,7 +2,7 @@
 # defaults file for Delete duplicates
 
 script_name: "harvest-duplicates.py"
-script_dir: "/home/{{ remote_user }}/harvest_duplicates"
+script_dir: "/home/{{ ansible_ssh_user }}/harvest_duplicates"
 script_path: "{{ script_dir }}/{{ script_name }}"
 
 python_executable_path: /usr/bin/python

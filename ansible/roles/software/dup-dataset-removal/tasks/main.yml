@@ -1,5 +1,13 @@
 ---
 # tasks file for run_script
+#- name: debug
+#  debug:
+#    msg: "{{ ansible_ssh_user }}"
+
+#- name: debug
+#  debug:
+#    msg: "{{ script_dir }}"
+  
 - name: "create directory {{ script_dir }} if not exist"
   file:
     path: "{{ script_dir }}"
@@ -9,7 +17,14 @@
   copy:
     src: "{{ script_name }}"
     dest: "{{ script_path }}"
-
+- name: "copy script requirements.rxt to remote host in location {{ script_dir }}"
+  copy:
+    src: "requirements.txt"
+    dest: "{{ script_dir }}"
+    
+- name: Install specified python requirements
+  pip:
+    requirements: "{{ script_dir }}/requirements.txt"
 - name: run python script
   command: "{{ python_executable_path }} {{ script_name }} -H {{ CKAN_DB_SERVER }} -n {{ catalog_db_name }} -u {{ catalog_db_user }} -p {{ catalog_db_pass }} -l {{ datagov_url }} -k {{ sysadmin_api_key }}"
   args:
