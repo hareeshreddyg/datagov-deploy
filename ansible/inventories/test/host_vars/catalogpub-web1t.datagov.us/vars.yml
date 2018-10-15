@@ -12,5 +12,7 @@ catalog_pycsw_db_name: "{{ vault_catalog_pycsw_db_name }}"
 # other
 SOLR_SERVER: "{{ solr_master_server }}"
 
-
+# extras
+SITE_URL: "{{ vault_ckan_site_url }}"
+API_KEY: "{{ vault_ckan_admin_api_key }}" 
 

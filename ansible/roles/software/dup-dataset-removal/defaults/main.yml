@@ -7,5 +7,5 @@ script_path: "{{ script_dir }}/{{ script_name }}"
 
 python_executable_path: /usr/bin/python
 
-datagov_url: "http://catalog-web-test.datagov.us"
-sysadmin_api_key: "34635fjhbsjdhbshsdbsd"
+datagov_url: "{{ SITE_URL }}"
+sysadmin_api_key: "{{ API_KEY }}"
