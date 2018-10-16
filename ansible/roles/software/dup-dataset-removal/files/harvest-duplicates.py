@@ -1,194 +1,125 @@
-import sys
-import requests
-import optparse
 import json
-import pdb
+import requests
+import sys
 import datetime
-
+import pdb
+import csv
+import optparse
 import psycopg2
 
+def get_org_list(url):
+    organizations_list = []
+    org_list = requests.get(url + "/api/action/package_search?q=source_type:datajson&rows=1000")
+    org_list = org_list.json()['result']['results']
 
-def get_organization_list(url, source_type):
-    '''
-           Get list of all organizations in Data.gov
-    '''
-    organizations = []
+    for organization in org_list:
+        if organization['organization']['name'] not in organizations_list:
+            organizations_list.append(organization['organization']['name'])
+    organizations_list.sort()
 
-    organization_list = requests.get(url + "/api/action/package_search?q=source_type:" + source_type + "&rows=1000")
-    organization_list = organization_list.json()['result']['results']
+    with open('org_out.txt', 'w') as f:
+       print >> f, 'Filename:', organizations_list
 
-    for organization in organization_list:
-        if organization['organization']['name'] not in organizations:
-            organizations.append(organization['organization']['name'])
+    return organizations_list
 
-    with open('out.txt', 'w') as f:
-        print >> f, 'Filename:', organizations
-
-    return organizations
-
-
-def get_dataset_names(url):
-    dataset_names = []
-    package_list = []
-    start = 0
-
-    # get total number of datasets
-    package_list_tmp = requests.post(url + "/api/action/package_list")
-    no_datasets = package_list_tmp.json()['result']['count']
-    print 'Total number of datasets: ', str(no_datasets)
-
-    while start <= 10:
-        data_dict = {'q': '', 'rows': 100, 'start': start}
-        package_list_tmp = requests.post(url + "/api/action/package_search",
-                                         json = data_dict)
-        package_list += package_list_tmp.json()['result']['results']
-        start += 1000
-
-    for package in package_list:
-        dataset_names.append(package['name'])
-    return dataset_names
-
-
-def get_datagov_datasets(dataset_name):
-    organization_datasets = []
-    start = 0
-
-    organization_list_tmp = requests.post("https://catalog.data.gov/api/action/package_search?q=name:"+dataset_name+"*")
-    no_datasets = organization_list_tmp.json()['result']['count']
-    datasets = organization_list_tmp.json()['result']['results']
-    duplicates = []
-
-    for data in datasets:
-        if data['name'][-6] == '-':
-            duplicates.append(data['name'])
-
-    return duplicates
-
-
-def get_dataset_list(options, datagov_url, organization_name, harvest_type):
+def get_dataset_list(options, datagov_url, org_name):
     '''
         Get the datasets on data.gov that we have for the organization
     '''
-    organization_datasets = []
     dataset_keep = []
-    duplicates = []
-    organization_harvest = []
+    org_harvest = []
     dataset_harvest_list = []
-
-    organization_list_tmp = requests.get(datagov_url+"/api/action/package_search?q=organization:" + organization_name +
-                            "&fq=type:dataset")
-    total_datasets = organization_list_tmp.json()['result']['count']
+    totla_dup_data = []
+    duplicates = []
+    dup_log = []
+    dup_json_log = []
 
     # get list of harvesters for the organization
-    organization_harvest_tmp = requests.get(datagov_url+"/api/action/package_search?q=organization:" + organization_name +
-                            "&fq=source_type:" + str(harvest_type) + "&rows=100")
-    organization_harvest_tmp = organization_harvest_tmp.json()['result']['results']
+    org_harvest_tmp = requests.get(
+        datagov_url + "/api/3/action/package_search?q=organization:" + org_name +
+        "&facet.field=[%22identifier%22]&facet.limit=-1&facet.mincount=2")
+    org_harvest_tmp = org_harvest_tmp.json()['result']['search_facets']['identifier']['items']
 
-    for harvest in organization_harvest_tmp:
-        organization_harvest.append(harvest['id'])
+    for harvest in org_harvest_tmp:
+        org_harvest.append(harvest['name'])
 
-
-    for harvest_id in organization_harvest:
-        dataset_list = requests.get(datagov_url +'/api/action/package_search?q=harvest_source_id:' + harvest_id)
+    for identifier in org_harvest:
+        dataset_list = requests.get(
+            datagov_url + '/api/action/package_search?q=identifier:"' + identifier + '"' +
+            '&fq=type:dataset&sort=metadata_modified+asc&rows=1000')
         harvest_data_count = dataset_list.json()['result']['count']
         start = 0
-
         while start <= harvest_data_count:
-            dataset_list = requests.get(datagov_url +'/api/action/package_search?q=harvest_source_id:'+harvest_id+'&start='+ str(start) + '&rows=1000')
+            dataset_list = requests.get(
+                datagov_url + '/api/action/package_search?q=identifier:"' + identifier + '"&start=' + str(
+                    start) + '&rows=1000')
             dataset_harvest_list += dataset_list.json()['result']['results']
             start += 1000
 
+        if dataset_list.status_code == 200:
+            try:
+                dataset_count = dataset_list.json()['result']['count']
+                data = dataset_list.json()['result']['results']
+
+                if dataset_count > 1:
+                    if data[dataset_count - 1]['id'] not in dataset_keep and \
+                            data[dataset_count - 1]['organization']['name'] == org_name:
+                        dataset_keep.append(data[dataset_count - 1]['id'])
+                else:
+                    dataset_keep.append(dataset['id'])
+
+            except IndexError:
+                continue
 
         for dataset_harvest in dataset_harvest_list:
-            organization_datasets.append(dataset_harvest['id'])
+            if dataset_harvest['id'] not in totla_dup_data and dataset_harvest['organization']['name'] == org_name:
+                totla_dup_data.append(dataset_harvest['id'])
 
-        dataset_keep_tmp = harvest_datasets(dataset_harvest_list)
-        dataset_keep += dataset_keep_tmp
+        duplicates = list(set(totla_dup_data) - set(dataset_keep))
 
-        duplicates = list(set(organization_datasets) - set(dataset_keep))
-        remove_duplicates(options, duplicates)
 
-        with open('organization_datasets_' + harvest_id + '.txt', 'w') as f:
-            print >> f, 'Filename:', organization_datasets
-        with open('duplicates_datasets_' + harvest_id + '.txt', 'w') as f:
-            print >> f, 'Filename:', duplicates
-        with open('keep_datasets_' + harvest_id + '.txt', 'w') as f:
-            print >> f, 'Filename:', dataset_keep
+    for dataset in duplicates:
+        for dataset_h in dataset_harvest_list:
+            if dataset_h['id'] == dataset:
+                for extra in dataset_h['extras']:
+                    # get the harvest_id
+                    if extra['key'] == 'identifier':
+                        identifier = extra['value']
+                    if extra['key'] == 'source_hash':
+                        source_hash = str(extra['value'])
+                        dup_json_log.append(dataset_h)
+                        dup_log.append(dataset_h['id']+ "','" + dataset_h['title'] + "','" +
+                                       dataset_h['metadata_created'] + "','" + identifier  + "','" + source_hash +
+                                       "','duplicate-removed'")
+
+    with open('duplicates_datasets_json_' + org_name + '.txt', 'w') as f:
+        print >> f, 'Filename:', dup_json_log
+
+    with open('duplicates_datasets_' + org_name + '.csv', "w") as csv_f:
+        writer = csv.writer(csv_f, lineterminator='\n')
+        for dslist in dup_log:
+            writer.writerow([dslist])
 
     return duplicates
 
+def remove_duplicate_datasets(duplicate_datasets):
+    # conn_string = "' dbname='' user='' password=''"
+    # print "Connecting to database\n ->%s" % (conn_string)
 
-def harvest_datasets(dataset_harvest_list):
-    dataset_keep = []
+    # conn = psycopg2.connect(conn_string)
+    #  cursor = conn.cursor()
+    with open('duplicate_datasets_out.txt', 'a') as f:
+        for data in duplicate_datasets:
+           # print(data)
+            #cursor.execute("update package set state='duplicate-removed' where name='" + data + "';")
+            print >> f, "update package set state='duplicate-removed' where name='" + data + "';"
+    #        conn.commit()
 
-    for dataset in dataset_harvest_list:
-        try:
-            for extra in dataset['extras']:
-                # get the harvest_id
-                oldest_id = dataset['id']
-
-                if extra['key'] == 'identifier':
-                    identifier = extra['value']
-                    dataset_list = requests.get(datagov_url +'/api/action/package_search?q=identifier:"' + identifier + '"' +
-                        '&fq=type:dataset&sort=metadata_modified+asc&rows=100')
-                    if dataset_list.status_code == 200:
-                        try:
-                            dataset_count = dataset_list.json()['result']['count']
-                            print dataset_count
-                            data = dataset_list.json()['result']['results']
-
-                            if dataset_count > 1:
-                                if data[dataset_count-1]['id'] not in dataset_keep:
-                                    dataset_keep.append(data[dataset_count-1]['id'])
-                            else:
-                                dataset_keep.append(dataset['id'])
-                        except IndexError:
-                            continue
-
-                if extra['key'] == 'extras_rollup':
-                    extras_rollup = extra['value']
-                    extras_rollup = json.loads(str(extras_rollup))
-                    identifier = extras_rollup['identifier']
-
-                    dataset_list = requests.get(datagov_url +'/api/action/package_search?q=identifier:"' + identifier + '"' +
-                                    '&fq=type:dataset&sort=metadata_modified+asc&rows=1000')
-                    if dataset_list.status_code == 200:
-                        dataset_count = dataset_list.json()['result']['count']
-                        data = dataset_list.json()['result']['results']
-
-                        if dataset_count > 1:
-                            if data[dataset_count-1]['id'] not in dataset_keep:
-                                dataset_keep.append(data[dataset_count-1]['id'])
-                        else:
-                            dataset_keep.append(dataset['id'])
-        except KeyError:
-            continue
-
-    return dataset_keep
-
-
-def remove_duplicates(options, duplicates):
-
-    conn_string = "host='{0}' dbname='{1}' user='{2}' password='{3}'".format(options.db_hostname, options.db_name, options.db_user, options.db_password)
-    print "Connecting to database\n ->%s" % (conn_string)
-
-    conn = psycopg2.connect(conn_string)
-    cursor = conn.cursor()
-
-    for data in duplicates:
-        print data
-        cursor.execute("update package set state='deleted' where id='" + data + "';")
-        conn.commit()
-
-    conn.close()
-
+    # conn.close()
 
 if __name__ == "__main__":
     '''
-        Only the code for getting the list of organizations and
-        the code for getting all the datasets for the organization will run
-        In the end we'll have files with the names of the datasets that need
-        to be deleted and the ones that have to stay
+        This code for getting the list of organizations and duplicate duplicate data sets
     '''
     optlist = [
         # use capitalized versions of std options help and version
@@ -223,15 +154,16 @@ if __name__ == "__main__":
 
     datagov_url = o.datagov_url
     sysadmin_api_key = o.sysadmin_api_key
+    duplicate_datasets = []
     datagov_datasets = []
-    organization_harvest_list = []
-
     # get organizations that have datajson harvester
-    organization_list = get_organization_list(datagov_url, 'datajson')
-    print organization_list
+    org_list = get_org_list(datagov_url)
 
-    # get list of duplicates
-    for organization in organization_list:
-        duplicates = get_dataset_list(o, datagov_url, organization, 'datajson')
-        # remove duplicates
-        #remove_duplicates(duplicates, sysadmin_api_key)
+    # get list of duplicate_datasets
+    for organization in org_list:
+        print(organization)
+        dataset_dup_tmp = get_dataset_list(o, datagov_url, organization)
+        duplicate_datasets += dataset_dup_tmp
+        print(dataset_dup_tmp)
+        #remove_duplicate_datasets(duplicate_datasets, sysadmin_api_key)
+        remove_duplicate_datasets(dataset_dup_tmp)
